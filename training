@@ -1,0 +1,443 @@
+function generateRandomVector(length, minValue, maxValue) {
+    let vector = [];
+    
+    for (let i = 0; i < length; i++) {
+        vector.push(Math.floor(Math.random() * (maxValue - minValue + 1)) + minValue);
+    }
+    
+    return vector;
+}
+
+function generateRandomMatrix(rows, itemsPerRow, minValue, maxValue) {
+    let array = [];
+    
+    for (let i = 0; i < rows; i++) {
+        let row = [];
+        for (let j = 0; j < itemsPerRow; j++) {
+            row.push(Math.floor(Math.random() * (maxValue - minValue + 1)) + minValue);
+        }
+        array.push(row);
+    }
+    
+    return array;
+}
+
+function vectorAdd(vector1, vector2) {//, vector1Name, vector2Name
+    if (vector1.length !== vector2.length) {
+        //console.log(`Vector1 name: ${vector1Name}`);
+        //console.log(`Vector2 name: ${vector2Name}`);
+        throw new Error('Both vectors must have the same length.');
+    }
+
+    const result = new Array(vector1.length);
+
+    for (let i = 0; i < vector1.length; i++) {
+        result[i] = vector1[i] + vector2[i];
+    }
+
+    return result;
+}
+
+function vectorSubtract(vector1, vector2, vector1Name, vector2Name) {
+    if (vector1.length !== vector2.length) {
+        console.log(`Vector1 name: ${vector1Name}`);
+        console.log(`Vector2 name: ${vector2Name}`);
+        throw new Error('Both vectors must have the same length.');
+    }
+
+    const result = new Array(vector1.length);
+
+    for (let i = 0; i < vector1.length; i++) {
+        result[i] = vector1[i] - vector2[i];
+    }
+
+    return result;
+}
+
+function elementWiseProduct(vectorA, vectorB) {
+    
+    if (vectorA.length !== vectorB.length) {
+        throw new Error('Both vectors must have the same length.');
+    }
+
+    
+    const result = new Array(vectorA.length);
+
+    
+    for (let i = 0; i < vectorA.length; i++) {
+        result[i] = vectorA[i] * vectorB[i];
+    }
+
+    return result;
+}
+
+function multiplyRowByColumn(rowVector, colVector) {
+    
+    if (!Array.isArray(rowVector) || !Array.isArray(colVector)) {
+        throw new Error('Both inputs must be arrays.');
+    }
+    
+    
+    if (rowVector.length === 0 || colVector.length === 0) {
+        throw new Error('Vectors must not be empty.');
+    }
+    
+    
+    const resultMatrix = new Array(rowVector.length);
+    for (let i = 0; i < rowVector.length; i++) {
+        resultMatrix[i] = new Array(colVector.length).fill(0);
+    }
+    
+    
+    for (let i = 0; i < rowVector.length; i++) {
+        for (let j = 0; j < colVector.length; j++) {
+            resultMatrix[i][j] = rowVector[i] * colVector[j];
+        }
+    }
+    
+    return resultMatrix;
+}
+
+function scaleVector(vector, scalar) {
+    const result = new Array(vector.length);
+
+    for (let i = 0; i < vector.length; i++) {
+        result[i] = vector[i] * scalar;
+    }
+
+    return result;
+}
+
+function multiplyMatrixByScalar(matrix, scalar) {
+    
+    if (!Array.isArray(matrix) || matrix.length === 0 || !matrix.every(Array.isArray)) {
+        throw new Error('Input must be a non-empty matrix (array of arrays).');
+    }
+
+    
+    if (typeof scalar !== 'number') {
+        throw new Error('Scalar must be a number.');
+    }
+
+    
+    const resultMatrix = new Array(matrix.length);
+    
+    for (let i = 0; i < matrix.length; i++) {
+        resultMatrix[i] = new Array(matrix[i].length); 
+        for (let j = 0; j < matrix[i].length; j++) {
+            
+            resultMatrix[i][j] = matrix[i][j] * scalar;
+        }
+    }
+
+    return resultMatrix;
+}
+
+function subtractMatrices(matrixA, matrixB) {
+    
+    if (!Array.isArray(matrixA) || !Array.isArray(matrixB) || 
+        matrixA.length === 0 || matrixB.length === 0 ||
+        matrixA.length !== matrixB.length ||
+        matrixA.some(row => !Array.isArray(row) || row.length !== matrixB[0].length)) {
+        throw new Error('Both matrices must be non-empty and have the same dimensions.');
+    }
+
+    
+    const resultMatrix = new Array(matrixA.length);
+    
+    for (let i = 0; i < matrixA.length; i++) {
+        resultMatrix[i] = new Array(matrixA[i].length); 
+        for (let j = 0; j < matrixA[i].length; j++) {
+            
+            resultMatrix[i][j] = matrixA[i][j] - matrixB[i][j];
+        }
+    }
+
+    return resultMatrix;
+}
+function matrixVectorMultiply(matrix, vector) { //matrixName, vectorName
+    // Log matrix and vector for debugging
+    //console.log("Matrix:", matrix);
+    //console.log("Vector:", vector);
+
+    // Check if vector is undefined or null
+    if (!matrix || !vector) {
+        throw new Error('Matrix or vector is undefined or null.');
+    }
+
+    // Check if the number of columns in the matrix matches the size of the vector
+    if (matrix[0].length !== vector.length) {
+        //console.log(`Vector name: ${vectorName}`);
+        //console.log(`Matrix name: ${matrixName}`);
+        throw new Error('Number of columns in the matrix must match the size of the vector: ' + vector);
+    }
+
+    // Initialize result vector with zeros
+    const result = new Array(matrix.length).fill(0);
+
+    // Perform matrix-vector multiplication
+    for (let i = 0; i < matrix.length; i++) {
+        for (let j = 0; j < matrix[i].length; j++) {
+            result[i] += matrix[i][j] * vector[j];  // Use 'vector[j]' instead of 'vector1[j]'
+        }
+    }
+
+    return result;
+}
+
+
+function multiplyMatrixRowByVector(matrix, vector) {
+    // Check if the number of elements in the vector matches the row length of the matrix
+    if (matrix[0].length !== vector.length) {
+        throw new Error("Vector length must match the number of columns in the matrix.");
+    }
+
+    let result = [];
+
+    // Loop through each row of the matrix
+    for (let i = 0; i < matrix.length; i++) {
+        result[i] = [];
+
+        // Loop through each element in the row and multiply by the corresponding element in the vector
+        for (let j = 0; j < matrix[i].length; j++) {
+            result[i][j] = matrix[i][j] * vector[j];
+        }
+    }
+
+    return result;
+}
+
+function transposeMatrix(matrix) {
+    let transposed = [];
+    
+    // Loop through each column of the original matrix
+    for (let i = 0; i < matrix[0].length; i++) {
+        transposed[i] = [];
+        
+        // Loop through each row of the original matrix
+        for (let j = 0; j < matrix.length; j++) {
+            transposed[i][j] = matrix[j][i];
+        }
+    }
+    
+    return transposed;
+}
+
+function sumMatrixRows(matrix) {
+    let result = [];
+
+    // Loop through each row of the matrix
+    for (let i = 0; i < matrix.length; i++) {
+        let sum = 0;
+
+        // Loop through each element in the row and add them together
+        for (let j = 0; j < matrix[i].length; j++) {
+            sum += matrix[i][j];
+        }
+
+        // Store the sum of the current row in the result array
+        result.push(sum);
+    }
+
+    return result;
+}
+
+function applyReLU(threshold, vector) {
+    return vector.map(value => value < threshold ? threshold : value);
+}
+function reluDerivative(vector) {
+    let result = [];
+
+    for (let i = 0; i < vector.length; i++) {
+        result.push(vector[i] > 0 ? 1 : 0);
+    }
+
+    return result;
+}
+
+function hardmax(vector) {
+    // Find the index of the maximum value in the vector
+    const maxIndex = vector.reduce((maxIdx, currentVal, currentIdx) => 
+        currentVal > vector[maxIdx] ? currentIdx : maxIdx, 0);
+    
+    // Create a new vector with the same length as the input
+    const result = new Array(vector.length).fill(0);
+    
+    // Set the maximum index to 1
+    result[maxIndex] = 1;
+
+    return result;
+}
+
+function norm(vector) {
+    let min = Math.min(...vector); 
+    let max = Math.max(...vector);  
+    let norm = max - min;  
+
+    
+    if (norm === 0) {
+        return new Array(vector.length).fill(0);  
+    }
+
+    const result = new Array(vector.length);
+
+    for (let i = 0; i < vector.length; i++) {
+        result[i] = (vector[i] - min) / norm;  
+    }
+    
+    return result;
+}
+
+function forwardPass(matrix1, vector1, vector2) {
+    const multipliedVector = matrixVectorMultiply(matrix1, vector1);
+    const addedVector = vectorAdd(multipliedVector, vector2);
+    //const finalVector = applyReLU(threshold, addedVector);
+    return addedVector;
+}
+
+function forwardPassSmax(matrix1, vector1, vector2) {
+    const multipliedVector = matrixVectorMultiply(matrix1, vector1);
+    const addedVector = vectorAdd(multipliedVector, vector2);
+
+    //const finalVector = norm(addedVector);
+    
+    return addedVector;
+}
+
+function crossEntropyLoss(Y, x) {
+    // Check if the lengths of the two vectors match
+    if (Y.length !== x.length) {
+        throw new Error("The length of vectors Y and x must be the same.");
+    }
+
+    let loss = 0;
+    const epsilon = 1e-17;  // A small number to avoid log(0)
+
+    // Loop through each element of the vectors
+    for (let i = 0; i < Y.length; i++) {
+        // Clip the predicted probabilities to avoid log(0) or log(1)
+        const clippedX = Math.min(Math.max(x[i], epsilon), 1 - epsilon);
+        
+        loss += Y[i] * Math.log(clippedX);
+    }
+
+    return -loss;
+}
+
+function layerError(weight, error, activated){
+  step1 = transposeMatrix(weight);
+  step2 = multiplyMatrixRowByVector(step1, error);
+  step3 = sumMatrixRows(step2);
+  step4 = reluDerivative(activated);
+  step5 = elementWiseProduct(step3, step4)
+  return step5;
+}
+
+function vectorBackPass(errorVector, learnrate, prevVector){
+  let step1 = scaleVector(errorVector, learnrate);
+  let step2 = vectorSubtract(prevVector, step1);
+  
+  return step2;
+}
+
+function matrixBackPass(gradient, learnrate, prevMatrix ){
+  let step1 = multiplyMatrixByScalar(gradient, learnrate);
+  let step2 = subtractMatrices(prevMatrix, step1)
+  
+  return step2;
+}
+
+function initializeVariables() {
+    const w1 = generateRandomMatrix(16, 784, 0.1, 1);
+    const w2 = generateRandomMatrix(16, 16, 0.1, 1);
+    const w3 = generateRandomMatrix(26, 16, 0.1, 1);
+    
+    const I = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.00392156862745098, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.0784313725490196, 0.4470588235294118, 0.49019607843137253, 0.3215686274509804, 0.1450980392156863, 0.1450980392156863, 0.15294117647058825, 0.45098039215686275, 0.615686274509804, 0.3686274509803922, 0.08235294117647059, 0.0392156862745098, 0.12549019607843137, 0.1450980392156863, 0.1450980392156863, 0.1450980392156863, 0.1450980392156863, 0.1450980392156863, 0.1450980392156863, 0.1450980392156863, 0.3215686274509804, 0.49019607843137253, 0.4470588235294118, 0.0784313725490196, 0, 0, 0, 0.011764705882352941, 0.42745098039215684, 0.9607843137254902, 0.9764705882352941, 0.9137254901960784, 0.8509803921568627, 0.8509803921568627, 0.8509803921568627, 0.9607843137254902, 0.984313725490196, 0.9176470588235294, 0.6745098039215687, 0.5568627450980392, 0.796078431372549, 0.8509803921568627, 0.8509803921568627, 0.8509803921568627, 0.8509803921568627, 0.8509803921568627, 0.8509803921568627, 0.8509803921568627, 0.9137254901960784, 0.9764705882352941, 0.9607843137254902, 0.42745098039215684, 0.011764705882352941, 0, 0, 0.01568627450980392, 0.4470588235294118, 0.9921568627450981, 0.996078431372549, 0.996078431372549, 0.996078431372549, 0.996078431372549, 0.996078431372549, 0.996078431372549, 0.996078431372549, 0.996078431372549, 0.9882352941176471, 0.984313725490196, 0.996078431372549, 0.996078431372549, 0.996078431372549, 0.996078431372549, 0.996078431372549, 0.996078431372549, 0.996078431372549, 0.996078431372549, 0.996078431372549, 0.996078431372549, 0.996078431372549, 0.4980392156862745, 0.01568627450980392, 0, 0, 0, 0.17647058823529413, 0.8392156862745098, 0.9137254901960784, 0.984313725490196, 0.996078431372549, 0.996078431372549, 0.996078431372549, 0.996078431372549, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0.996078431372549, 0.996078431372549, 0.984313725490196, 0.44313725490196076, 0.01568627450980392, 0, 0, 0, 0, 0.0196078431372549, 0.08627450980392157, 0.3215686274509804, 0.5019607843137255, 0.6274509803921569, 0.7215686274509804, 0.8509803921568627, 0.8509803921568627, 0.8549019607843137, 0.9764705882352941, 0.996078431372549, 1, 1, 1, 1, 1, 0.996078431372549, 0.996078431372549, 0.9686274509803922, 0.8470588235294118, 0.6666666666666666, 0.3254901960784314, 0.027450980392156862, 0, 0, 0, 0, 0, 0, 0, 0.00784313725490196, 0.0196078431372549, 0.06274509803921569, 0.09803921568627451, 0.1450980392156863, 0.1568627450980392, 0.19607843137254902, 0.8901960784313725, 0.996078431372549, 1, 1, 0.996078431372549, 0.996078431372549, 0.9882352941176471, 0.9607843137254902, 0.8627450980392157, 0.6235294117647059, 0.14901960784313725, 0.08235294117647059, 0.011764705882352941, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.03529411764705882, 0.30196078431372547, 0.5490196078431373, 0.9686274509803922, 0.996078431372549, 0.996078431372549, 0.996078431372549, 0.996078431372549, 0.9568627450980393, 0.6941176470588235, 0.4470588235294118, 0.19607843137254902, 0.0784313725490196, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.011764705882352941, 0.13333333333333333, 0.6862745098039216, 0.9647058823529412, 0.996078431372549, 0.996078431372549, 0.996078431372549, 0.9921568627450981, 0.8666666666666667, 0.45098039215686275, 0.1803921568627451, 0.027450980392156862, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.011764705882352941, 0.13333333333333333, 0.32941176470588235, 0.6862745098039216, 0.984313725490196, 0.996078431372549, 0.996078431372549, 0.9921568627450981, 0.9176470588235294, 0.792156862745098, 0.3568627450980392, 0.01568627450980392, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.0392156862745098, 0.30980392156862746, 0.8, 0.9137254901960784, 0.984313725490196, 0.996078431372549, 1, 1, 0.9372549019607843, 0.4549019607843137, 0.13725490196078433, 0.027450980392156862, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.0784313725490196, 0.4823529411764706, 0.8627450980392157, 0.996078431372549, 0.996078431372549, 0.996078431372549, 1, 1, 1, 0.9725490196078431, 0.6470588235294118, 0.1450980392156863, 0.08235294117647059, 0.12549019607843137, 0.03529411764705882, 0.01568627450980392, 0.01568627450980392, 0.01568627450980392, 0.01568627450980392, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.39215686274509803, 0.9333333333333333, 0.996078431372549, 1, 1, 1, 1, 1, 1, 0.996078431372549, 0.9921568627450981, 0.9215686274509803, 0.9176470588235294, 0.9607843137254902, 0.8705882352941177, 0.8509803921568627, 0.8509803921568627, 0.8509803921568627, 0.796078431372549, 0.45098039215686275, 0.12549019607843137, 0, 0, 0, 0, 0, 0, 0, 0.12941176470588237, 0.6392156862745098, 0.9568627450980393, 0.996078431372549, 0.996078431372549, 0.996078431372549, 1, 1, 1, 1, 0.996078431372549, 0.996078431372549, 0.996078431372549, 0.996078431372549, 0.996078431372549, 0.996078431372549, 0.996078431372549, 0.996078431372549, 0.996078431372549, 0.9411764705882353, 0.43529411764705883, 0.011764705882352941, 0, 0, 0, 0, 0, 0, 0.00392156862745098, 0.12941176470588237, 0.49411764705882355, 0.8470588235294118, 0.9137254901960784, 0.9803921568627451, 0.996078431372549, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0.996078431372549, 0.996078431372549, 0.9137254901960784, 0.3215686274509804, 0.00784313725490196, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.0196078431372549, 0.08627450980392157, 0.3215686274509804, 0.984313725490196, 1, 1, 1, 1, 1, 1, 0.996078431372549, 0.996078431372549, 0.9803921568627451, 0.9137254901960784, 0.8509803921568627, 0.796078431372549, 0.43137254901960786, 0.07058823529411765, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.0392156862745098, 0.5019607843137255, 0.996078431372549, 1, 1, 0.996078431372549, 0.996078431372549, 0.996078431372549, 0.996078431372549, 0.9647058823529412, 0.8156862745098039, 0.5490196078431373, 0.3215686274509804, 0.15294117647058825, 0.12549019607843137, 0.01568627450980392, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.08627450980392157, 0.37254901960784315, 0.8666666666666667, 0.996078431372549, 1, 0.996078431372549, 0.9921568627450981, 0.9176470588235294, 0.8509803921568627, 0.8431372549019608, 0.4980392156862745, 0.1803921568627451, 0.03529411764705882, 0.00784313725490196, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.011764705882352941, 0.6039215686274509, 0.9098039215686274, 0.9921568627450981, 0.996078431372549, 0.996078431372549, 0.9882352941176471, 0.8117647058823529, 0.37254901960784315, 0.15294117647058825, 0.1450980392156863, 0.03137254901960784, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.00784313725490196, 0.30196078431372547, 0.9686274509803922, 0.996078431372549, 1, 0.996078431372549, 0.9490196078431372, 0.5137254901960784, 0.03529411764705882, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.01568627450980392, 0.49019607843137253, 0.996078431372549, 0.996078431372549, 0.9882352941176471, 0.9098039215686274, 0.5137254901960784, 0.12549019607843137, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.01568627450980392, 0.44313725490196076, 0.9921568627450981, 0.9647058823529412, 0.6941176470588235, 0.42745098039215684, 0.08627450980392157, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.03137254901960784, 0.43529411764705883, 0.30196078431372547, 0.03137254901960784, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.011764705882352941, 0.00784313725490196, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    const b1 = generateRandomVector(16, 0.1, 1);
+    const b2 = generateRandomVector(16, 0.1, 1);
+    const b3 = generateRandomVector(26, 0.1, 5);
+    
+    const ans = new Array(26).fill(0).map((_, index) => (index === 23 ? 1 : 0)); 
+    // a1 b2 c3 d4 e5 f6 g7 h8 i9 j10 k11 l12 m13 n14 o15 p16 q17 r18 s19 t20 u21 v22 w23 x24 y25 z26
+    const threshold = 0;
+    const learnrate = 0.01;
+
+    return { w1, w2, w3, I, b1, b2, b3, ans, threshold, learnrate };
+}
+
+
+
+function runNeuralNetworkTraining(iterations) {
+    
+    let { w1, w2, w3, I, b1, b2, b3, ans, threshold, learnrate  } = initializeVariables();
+
+      console.log(ans)
+
+        const a1 = forwardPass(w1, I, b1); // 16
+        const z1 = applyReLU(threshold, a1);
+        const a2 = forwardPass(w2, z1, b2); // 16
+        const z2 = applyReLU(threshold, a2);
+        const a3 = forwardPass(w3, z2, b3); // 26
+        const z3 = norm(a3);
+        const final = hardmax(z3);
+        const L = crossEntropyLoss(ans, z3);
+        
+        //console.log(final);
+        //console.log(`Loss at iteration 0: ${L}`);
+
+
+
+    for (let i = 0; i < iterations; i++) {
+        // Forward Pass
+        const a1 = forwardPass(w1, I, b1); // 16
+        const z1 = applyReLU(threshold, a1);
+        const a2 = forwardPass(w2, z1, b2); // 16
+        const z2 = applyReLU(threshold, a2);
+        const a3 = forwardPass(w3, z2, b3); // 26
+        const z3 = norm(a3);
+        //const final = hardmax(z3);
+        const L = crossEntropyLoss(ans, z3);
+        //console.log(`Loss at iteration ${i + 1}: ${L}`);
+        
+        // Backward Pass
+        const e3 = vectorSubtract(z3, ans); // 26
+        const e2 = layerError(w3, e3, z2); // 16
+        const e1 = layerError(w2, e2, z1); // 16
+        
+        const gw3 = multiplyRowByColumn(e3, a2);
+        const gw2 = multiplyRowByColumn(e2, a1);
+        const gw1 = multiplyRowByColumn(e1, I);
+        
+        const nw1 = matrixBackPass(gw1, learnrate, w1);
+        const nw2 = matrixBackPass(gw2, learnrate, w2);
+        const nw3 = matrixBackPass(gw3, learnrate, w3);
+        
+        const nb1 = vectorBackPass(e1, learnrate, b1);
+        const nb2 = vectorBackPass(e2, learnrate, b2);
+        const nb3 = vectorBackPass(e3, learnrate, b3);
+        
+        // Update weights and biases
+        w1 = nw1;
+        w2 = nw2;
+        w3 = nw3;
+        b1 = nb1;
+        b2 = nb2;
+        b3 = nb3;
+
+        // Forward Pass for updated weights and biases
+        const na1 = forwardPass(w1, I, b1); // 16
+        const nz1 = applyReLU(threshold, na1);
+        const na2 = forwardPass(w2, nz1, nb2); // 16
+        const nz2 = applyReLU(threshold, na2);
+        const na3 = forwardPass(w3, nz2, nb3); // 26
+        const nz3 = norm(na3);
+        const final = hardmax(nz3);
+        const nL = crossEntropyLoss(ans, nz3);
+        //console.log(`Updated Loss at iteration ${i + 1}: ${nL}`);
+        console.log(`Updated final answer at iteration ${i + 1}: ${final}`);
+    }
+}
+
+
+const iterations = 300; 
+runNeuralNetworkTraining(iterations);
