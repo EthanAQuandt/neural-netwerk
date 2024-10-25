@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Display, Rotate, and Flip Images from IDX File</title>
+    <style>
+        canvas {
+            border: 1px solid #ccc;
+            margin: 5px;
+        }
+        #imageContainer {
+            display: flex;
+            flex-wrap: wrap;
+        }
+        #pixelVector {
+            margin-top: 20px;
+            white-space: pre-wrap; /* Preserve whitespace for vector display */
+            border: 1px solid #ccc;
+            padding: 10px;
+            max-height: 200px; /* Limit height */
+            overflow: auto; /* Add scroll if too many pixels */
+            font-family: monospace; /* Monospaced font for better readability */
+        }
+    </style>
+</head>
+<body>
+
+<h2>Upload IDX File and Select Number of Images to Display (Rotated 90° Left + Flipped)</h2>
+<input type="file" id="fileInput" />
+<br>
+<label for="numImages">Number of Images to Display:</label>
+<input type="number" id="numImages" value="1" min="1" max="100" />
+<br><br>
+<div id="imageContainer"></div>
+
+<label for="imageSelector">Select Image for Pixel Vector:</label>
+<select id="imageSelector"></select>
+<button id="getVectorButton">Get Pixel Vector</button>
+
+<h3>Pixel Vector Output:</h3>
+<div id="pixelVector"></div>
+
+<script>
+let numImages; // Store the number of images for later use
+const pixelVectors = []; // Array to hold pixel vectors for each image
+
+document.getElementById('fileInput').addEventListener('change', function(event) {
+    const file = event.target.files[0];
+    if (!file) {
+        return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = function(event) {
+        const buffer = event.target.result;
+        const dataView = new DataView(buffer);
+
+        // Read IDX file header
+        const magicNumber = dataView.getUint32(0);
+        numImages = dataView.getUint32(4);
+        const numRows = dataView.getUint32(8);
+        const numCols = dataView.getUint32(12);
+
+        if (magicNumber !== 2051) { // Check for magic number (2051 for IDX)
+            alert('Invalid IDX file');
+            return;
+        }
+
+        const numToDisplay = Math.min(parseInt(document.getElementById('numImages').value), numImages);
+        const imageContainer = document.getElementById('imageContainer');
+        imageContainer.innerHTML = ''; // Clear previous images
+        const pixelVectorOutput = document.getElementById('pixelVector');
+        pixelVectorOutput.innerHTML = ''; // Clear previous output
+        const imageSelector = document.getElementById('imageSelector');
+        imageSelector.innerHTML = ''; // Clear previous options
+        pixelVectors.length = 0; // Clear previous pixel vectors
+
+        const imageSize = numRows * numCols;
+
+        for (let imgIndex = 0; imgIndex < numToDisplay; imgIndex++) {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = numRows; // Rotated image width
+            canvas.height = numCols; // Rotated image height
+            imageContainer.appendChild(canvas);
+
+            const firstImageOffset = 16 + imgIndex * imageSize; // 16-byte header + image offset
+            const imageData = [];
+
+            for (let i = 0; i < imageSize; i++) {
+                imageData.push(dataView.getUint8(firstImageOffset + i));
+            }
+
+            const image = ctx.createImageData(numRows, numCols);
+            const pixelVector = []; // Array to hold the normalized pixel values
+
+            for (let row = 0; row < numRows; row++) {
+                for (let col = 0; col < numCols; col++) {
+                    const originalIdx = row * numCols + col;
+                    const rotatedFlippedIdx = col * numRows + row;
+                    const pixelValue = imageData[originalIdx];
+
+                    // Normalize pixel value to range [0, 1]
+                    const normalizedValue = pixelValue / 255; // Assuming pixelValue is from 0 to 255
+                    pixelVector.push(normalizedValue); // Store normalized value
+
+                    const idx = rotatedFlippedIdx * 4;
+                    image.data[idx] = pixelValue; // R
+                    image.data[idx + 1] = pixelValue; // G
+                    image.data[idx + 2] = pixelValue; // B
+                    image.data[idx + 3] = 255; // A
+                }
+            }
+
+            ctx.putImageData(image, 0, 0);
+            pixelVectors.push(pixelVector); // Store the pixel vector for this image
+
+            // Populate the image selector
+            const option = document.createElement('option');
+            option.value = imgIndex;
+            option.textContent = `Image ${imgIndex + 1}`;
+            imageSelector.appendChild(option);
+        }
+    };
+
+    reader.readAsArrayBuffer(file);
+});
+
+// Button to get the pixel vector for the selected image
+document.getElementById('getVectorButton').addEventListener('click', function() {
+    const selectedIndex = parseInt(document.getElementById('imageSelector').value);
+    const pixelVectorOutput = document.getElementById('pixelVector');
+    pixelVectorOutput.innerHTML = `Image ${selectedIndex + 1} Pixel Vector:\n${pixelVectors[selectedIndex].join(', ')}`;
+});
+
+document.getElementById('numImages').addEventListener('input', function() {
+    const file = document.getElementById('fileInput').files[0];
+    if (file) {
+        document.getElementById('fileInput').dispatchEvent(new Event('change'));
+    }
+});
+</script>
+
+</body>
+</html>
